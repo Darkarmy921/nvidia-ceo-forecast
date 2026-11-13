@@ -13,7 +13,7 @@ Method (stdlib only, deterministic, no network):
     For each anchor, the robust scale of the changes is
     max(IQR / 1.349, 1.4826 * MAD), expressed per sqrt(minute), and
     sigma is the median of the anchors' values. The estimate blends
-    three lookback windows (3h / 24h / 72h, weights 0.5 / 0.3 / 0.2)
+    three lookback windows (3h / 12h / 72h, weights 0.4 / 0.3 / 0.3)
     so it adapts to the current volatility regime while staying stable.
     These markets move in steps with rare huge jumps, so a robust scale
     (not a plain standard deviation) is what survives.
@@ -22,7 +22,7 @@ Method (stdlib only, deterministic, no network):
     and rounded to 6 decimals.
 
 Local practice score (p00-p04, answers rebuilt from the next case's
-input): pinball loss 0.316, vs 0.393 for the house baseline's fixed
+input): pinball loss 0.313, vs 0.393 for the house baseline's fixed
 sigma of 0.0025 on the same cases.
 """
 
@@ -35,7 +35,7 @@ QUANTILES = (0.05, 0.25, 0.5, 0.75, 0.95)
 Z = (-1.644854, -0.674490, 0.0, 0.674490, 1.644854)
 ANCHORS = (1, 5, 15, 60, 240)
 # (lookback minutes, weight) for the volatility blend.
-WINDOWS = ((180, 0.5), (1440, 0.3), (4320, 0.2))
+WINDOWS = ((180, 0.4), (720, 0.3), (4320, 0.3))
 SIGMA_FLOOR = 0.0004
 SIGMA_CAP = 0.03
 OUTER_WIDEN = 1.3
