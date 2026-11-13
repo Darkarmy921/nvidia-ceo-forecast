@@ -19,11 +19,20 @@ Method (stdlib only, deterministic, no network):
     (not a plain standard deviation) is what survives.
   * Quantiles: x + z_tau * sigma * sqrt(h), with the outer quantiles
     (|z| > 1) widened by 1.3x to cover the jump tails, clamped to [0, 1]
-    and rounded to 6 decimals.
+    and rounded to 6 decimals. The 75% quantile is deliberately NOT the
+    Gaussian 0.674: these prices are step functions that sit flat most
+    minutes and jump rarely, so the realised 75th percentile of moves
+    sits only ~0.10-0.18 sigma*sqrt(h) above the median (measured on the
+    six practice cases; the Gaussian 0.674 is far too wide and costs
+    pinball loss on the common flat minutes). The 25% quantile keeps the
+    Gaussian 0.674: the down side is wider than the up side in the centre.
 
-Local practice score (p00-p04, answers rebuilt from the next case's
-input): pinball loss 0.313, vs 0.393 for the house baseline's fixed
-sigma of 0.0025 on the same cases.
+Local practice score (p00-p05, p05 answers rebuilt from public
+Polymarket trade history): pinball loss 0.267, vs 0.275 for the v2
+Gaussian fan and 0.393 for the house baseline's fixed sigma of 0.0025
+on the same cases. Walk-forward pseudo-cases (earlier 4h windows from
+the same inputs): 0.280 vs v2's 0.286 (recent) and 2.571 vs 2.580
+(early wild regime) — the change helps in both regimes.
 """
 
 import json
@@ -32,7 +41,8 @@ import os
 from pathlib import Path
 
 QUANTILES = (0.05, 0.25, 0.5, 0.75, 0.95)
-Z = (-1.644854, -0.674490, 0.0, 0.674490, 1.644854)
+# Gaussian z-scores, except the 75% quantile: 0.15, not 0.674 (see docstring).
+Z = (-1.644854, -0.674490, 0.0, 0.15, 1.644854)
 ANCHORS = (1, 5, 15, 60, 240)
 # (lookback minutes, weight) for the volatility blend.
 WINDOWS = ((180, 0.4), (720, 0.3), (4320, 0.3))
